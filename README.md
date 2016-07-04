@@ -300,6 +300,7 @@ Query fields determine what data is used to match when returning recommendations
       "currentDate": "2015-08-15T11:28:45.114-07:00",
       “blacklistItems”: [“itemId1”, “itemId2”, ...]
       "returnSelf": true | false,
+      "from": 5, // used for pagination
     }
 
 * **user**: optional, contains a unique id for the user. This may be a user not in the **training**: data, so a new or anonymous user who has an anonymous id. All user history captured in near realtime can be used to influence recommendations, there is no need to retrain to enable this.
@@ -315,6 +316,7 @@ Query fields determine what data is used to match when returning recommendations
 * **dateRange** optional, default is not range filter. One of the bound can be omitted but not both. Values for the `beforeDate` and `afterDate` are strings in ISO 8601 format. A date range is ignored if **currentDate** is also specified in the query.
 * **currentDate** optional, must be specified if used. Overrides the **dateRange** is both are in the query.
 * **returnSelf**: optional boolean asking to include the item that was part of the query (if there was one) as part of the results. Defaults to false.
+* **from** optional, default = 1. This tells the recommender where to return the `num` recommendations from and so specifies the starting point for a paginated set of results. If `num` is 4 and `from`is 5 the recommender will return recommendations 5-8. If `from` is not set the first `num` are always returned.
  
 Defaults are either noted or taken from algorithm values, which themselves may have defaults. This allows very simple queries for the simple, most used cases.
  
@@ -517,6 +519,11 @@ To begin using new data with an engine that has been used with sample data or us
  - For Scaling and Architecture see [these docs](https://github.com/actionml/cluster-setup/blob/master/architecture-and-scaling.md)
 
 ## Version Changelog
+
+### v0.4.0
+
+ - **Pagination**: queries now allow a `size` and `from` parameter to control pagination of recommendation results.
+ - **Precision Improvements**: the LLR weights for CCO are now passed through to the model indexed in Elasticsearch. This improves the quality of results without any changes to tuning.
 
 ### v0.3.0
 
