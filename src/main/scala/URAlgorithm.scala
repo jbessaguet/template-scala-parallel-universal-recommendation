@@ -611,6 +611,7 @@ class URAlgorithm(val ap: URAlgorithmParams)
 
     val filteringMetadata = getFilteringMetadata(query)
     val filteringDateRange = getFilteringDateRange(query)
+    val filteringGeoDistance = getFilteringGeoDistance(query)
     val allFilteringCorrelators = recentUserHistoryFilter ++ similarItemsFilter ++ filteringMetadata
 
     val mustFields: Seq[JValue] = allFilteringCorrelators.map {
@@ -618,6 +619,7 @@ class URAlgorithm(val ap: URAlgorithmParams)
         render("terms" -> (actionName -> itemIDs) ~ ("boost" -> 0))
     }
     mustFields ++ filteringDateRange
+    mustFields ++ filteringGeoDistance
   }
 
   /** Build not must query part */
@@ -847,5 +849,35 @@ class URAlgorithm(val ap: URAlgorithmParams)
   def getRankingMapping: Map[String, String] = rankingFieldNames map { fieldName =>
     fieldName -> "float"
   } toMap
+
+  /** get part of query for dates and date ranges */
+  def getFilteringGeoDistance(query: Query): Seq[JValue] = {
+
+    val json: Seq[JValue] = if (query.geoDistance.nonEmpty) {
+      val name = query.geoDistance.get.name
+      val distance = query.geoDistance.get.distance
+      val lat = query.geoDistance.get.geoPosition.latitude
+      val lon = query.geoDistance.get.geoPosition.longitude
+      val distanceQuery = s"""
+                          |{
+                          |  "constant_score": {
+                          |    "filter": {
+                          |      "geo_distance": {
+                          |        "distance": "$distance",
+                          |        "$name": {
+                          |          "lat": "$lat",
+                          |          "lon": "$lon"
+                          |        }
+                          |      }
+                          |    },
+                          |    "boost": 0
+                          |  }
+                          |}
+        """.stripMargin
+      Seq(parse(distanceQuery))
+    }
+    json
+  }
+
 
 }

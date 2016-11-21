@@ -38,6 +38,7 @@ case class Query(
   currentDate: Option[String] = None, // if used will override dateRange filter, currentDate must lie between the item's
   // expireDateName value and availableDateName value, all are ISO 8601 dates
   dateRange: Option[DateRange] = None, // optional before and after filter applied to a date field
+  geoDistance: Option[GeoDistance] = None, // optional latitude and longitude filter applied to a GeoPosition field
   blacklistItems: Option[List[String]] = None, // default: whatever is in algorithm params or None
   returnSelf: Option[Boolean] = None, // means for an item query should the item itself be returned, defaults
   // to what is in the algorithm params or false
@@ -60,6 +61,27 @@ case class DateRange(
   before: Option[String], // empty strings means no filter
   after: Option[String]) // both empty should be ignored
     extends Serializable
+
+case class GeoPosition(
+  latitude: Float,
+  longitude: Float,
+  altitude: Option[Int] = 0/*, // default: 0
+  address: Option[String],
+  countryAlpha2: Option[String],
+  countryAlpha3: Option[String],
+  city: Option[String],
+  countryName: Option[String],
+  areaCode: Option[Int],
+  postalCode: Option[String],
+  region: Option[String],
+  dmaCode: Option[Int]*/
+) extends Serializable
+
+case class GeoDistance(
+  name: String, // Name of the property for comparison 
+  distance: String,
+  geoPosition: GeoPosition
+) extends Serializable
 
 /** results of a URAlgoritm.predict */
 case class PredictedResult(
